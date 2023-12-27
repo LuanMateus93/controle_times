@@ -40,161 +40,127 @@ def animacao_carregamento():
             time.sleep(0.5)  # Pausa antes da próxima atualização
 
 def impressaoListaDeTimes():
+    chaves = list(ordenaDicionario().keys())
+    
     print('='*4, 'LISTA DE TIMES', '='*4, '\n')
-    for i in range(len(listaTimes)):
-        print(f"{i}-{listaTimes[i]}")
+    for i in range(len(chaves)):
+        print(f"{i}-{chaves[i]}")
 
-    print("\n" + "="*20)
+    print("\n" + "="*23)
+
+def ordenaDicionario():
+    listaTimesOrdenada = dict(sorted(listaTimes.items(), key=lambda item: item[0]))
+
+    return listaTimesOrdenada
+
+def limpar_entrada():
+    if sys.stdin.isatty():
+        try:
+            # Para sistemas Unix/Linux
+            import termios
+            termios.tcflush(sys.stdin, termios.TCIOFLUSH)
+        except ImportError:
+            # Para Windows (Apenas uma tentativa, pode não funcionar conforme esperado)
+            import msvcrt
+            while msvcrt.kbhit():
+                msvcrt.getch()
 
 def adicionaTime():
-    opcaoAdicionaTime = input("Deseja continuar(S/N): ").strip().lower()
+
+    nome = input("Qual o nome do time que deseja adicionar: ")
+    nome = nome[0].upper() + nome[1:].lower()
     limpar_tela()
 
-    while opcaoAdicionaTime not in ['s', 'n']: 
-        print("Erro! Digite apenas S ou N")
-        opcaoAdicionaTime = input("Deseja continuar(S/N): ").strip().lower()
+    confirmacao = input(f"Tem certeza que quer adicionar {nome}?(S/N): ").strip().lower()
+
+    while confirmacao not in ['s', 'n']: 
+        confirmacao = input("Erro! Digite apenas S ou N: ").strip().lower()
         limpar_tela()
 
-    if opcaoAdicionaTime in ['s']:
-        limpar_tela()
-        nome = input("Qual o nome do time que deseja adicionar: ")
-        nome = nome[0].upper() + nome[1:].lower()
-        times = {'nome': nome}
-        listaTimes[nome] = times
-        limpar_tela()
+    if confirmacao == 's':
+        if nome not in listaTimes:
+            try:
+                limpar_tela
+                listaTimes[nome] = {'nome': nome}
+                limpar_tela()
 
-        if listaTimes[nome]:
-            print(f"{nome} criado com sucesso!\n")
-            animacao_carregamento()
-            limpar_tela()
+                print(f"{nome} criado com sucesso!\n")
+                animacao_carregamento()
+                limpar_tela()
+            except Exception as e:
+                print("Erro ao criar o time.\n")
+                print(f"Erro: {e}\n")
+                animacao_carregamento()
+                limpar_tela()
         else:
-            print("Erro ao criar o time.\n")
-            print("-"*5, " Aguarde ", "-"*5)
+            print('Este time já existe na lista.\n')
             animacao_carregamento()
             limpar_tela()
+            escolha()
     else:
-        escolha()
-
-def removerTime():
-    chaves = list(listaTimes.keys())
-    
-    if not chaves:
-        print("Não há times cadastrados para remover.")
+        limpar_tela()
         animacao_carregamento()
         limpar_tela()
-        escolha()
-        return
 
-    opcaoRemoveTime = input("Deseja continuar(S/N): ").strip().lower() 
+def removerTime():
+    impressaoListaDeTimes()
+    nome = input('\nDigite o nome do time que deseja excluir: ')
     limpar_tela()
     
-    while opcaoRemoveTime not in ['s', 'n']: 
-        opcaoRemoveTime = input("Erro! Digite apenas S ou N\n").strip().lower()
+    confirmacao = input(f"Tem certeza que deseja excluir o time {nome}? (S/N): ").strip().lower()
+    limpar_tela()
+
+    while confirmacao not in ['s', 'n']: 
+        confirmacao = input("Erro! Digite apenas S ou N\n").strip().lower()
         limpar_tela()
 
-    if opcaoRemoveTime in ['s']:
-        remocao = input('Digite I para deletar pelo indice e N pelo nome do time: ').strip().lower()
-        limpar_tela()
-
-        while remocao not in ['i', 'n']:
-            remocao = input('Erro! Digite apenas I ou N: ').strip().lower()
-        
-        limpar_tela()
-
-        if remocao in ['i']:
-            impressaoListaDeTimes()
-            indice = int(input('\nDigite o índice do time que deseja excluir: '))
-
-            while indice <= 0 or indice > len(chaves):
-                impressaoListaDeTimes()
-                indice = int(input("Insira um indice válido: "))
-                limpar_tela()
-
-            nome_do_time = chaves[indice]
-            confirmacao = input(f"Tem certeza que deseja excluir o time {nome_do_time}? (S/N): ").strip().lower()
-            limpar_tela()
-
-            while confirmacao not in ['s', 'n']: 
-                confirmacao = input("Erro! Digite apenas S ou N\n").strip().lower()
-                limpar_tela()
-
-            if confirmacao == 's':
-                del listaTimes[nome_do_time]
-                if nome_do_time not in listaTimes:
-                    print(f"{nome_do_time} removido com sucesso.\n")
-                    animacao_carregamento()
-                    limpar_tela()
-                else:
-                    print("\nFalha na exclusão!\n")
-                    animacao_carregamento()
-                    limpar_tela()
-            else:
-                print("Operação cancelada pelo usuário.")
-                animacao_carregamento()
-                limpar_tela()
-
-        elif remocao in ['n']:
-            impressaoListaDeTimes()
-            nome = input('\nDigite o nome do time que deseja excluir: ')
-            limpar_tela()
-
-            if isinstance(nome, int):
-                while isinstance(nome, int):
-                    impressaoListaDeTimes()
-                    nome = input('\nNome inválido. Por favor insira um nome válido: ')
-                    limpar_tela()   
-            elif nome not in listaTimes:
-                while nome not in listaTimes:
-                    impressaoListaDeTimes()
-                    nome = input('\nNome inválido. Por favor insira um nome válido: ')
-                    limpar_tela()
+    if confirmacao == 's':
+        try:
+            del listaTimes[nome]
             
-            confirmacao = input(f"Tem certeza que deseja excluir o time {nome}? (S/N): ").strip().lower()
+            print(f"{nome} removido com sucesso.\n")
+            animacao_carregamento()
             limpar_tela()
+            escolha()
+        except KeyError:
+            print(f"O time {nome} não existe na lista e não pode ser removido.Retornando ao menu principal\n")
+            animacao_carregamento()
+            limpar_tela()
+            escolha()
+        except Exception as e:
+            print(f"Ocorreu um erro ao tentar remover {nome}: {e}.Retornando ao menu principal\n")
+            animacao_carregamento()
+            limpar_tela()
+            escolha()
+    else:
+        limpar_tela()
+        animacao_carregamento()
+        limpar_tela()
 
-            while confirmacao not in ['s', 'n']: 
-                confirmacao = input("Erro! Digite apenas S ou N\n").strip().lower()
-                limpar_tela()
 
-            if confirmacao == 's':
-                del listaTimes[nome]
-                if nome not in listaTimes:
-                    print(f"{nome} removido com sucesso.\n")
-                    animacao_carregamento()
-                    limpar_tela()
-                else:
-                    print(f"Ocorreu um erro ao tentar remover {nome}.\n")
-                    animacao_carregamento()
-                    limpar_tela()
-                    escolha()
-            else:
-                print("Operação cancelada pelo usuário.")
-                animacao_carregamento()
-                limpar_tela()
-                escolha()  
-        escolha()
-
-def listaTimes():
-    if not listaTimes:  # Verifica se a lista de chaves está vazia
+def listarTimes():
+    if not listaTimes:
         print("Não há times cadastrados.")
-        time.sleep(3)
-        escolha()
+        voltar = input("\nAperte Enter para voltar: ")
+        limpar_tela()
+
+        while voltar != '':
+            voltar = int(input("\nOpção Inválida.Aperte Enter: "))
+            limpar_tela()
     else:
         impressaoListaDeTimes()
-        voltar = int(input("\nAperte 1 para voltar: "))
+        voltar = input("\nAperte Enter para voltar: ")
         limpar_tela()
 
-        while voltar != 1:
-            voltar = int(input("\nOpção Inválida.Digite 1: "))
-            limpar_tela()
-
-        if voltar == 1:
+        while voltar != '':
+            voltar = int(input("\nOpção Inválida.Aperte Enter: "))
             limpar_tela()
 
 def escolha():
     global programa_ativo
     while programa_ativo:
         try:
+            limpar_entrada()
             print('='*7, 'MENU', '='*7, '\n')
             opcao = int(input("1-Adicionar um time\n2-Remover um time\n3-Listar times\n4-Adicionar jogador em um time\n5-Remover jogador de um time\n6-Listar jogadores de um time\n7-Fechar programa\n\nOpção Escolhida: "))
 
@@ -207,7 +173,14 @@ def escolha():
                     removerTime()
                 elif opcao == 3:
                     limpar_tela()
-                    listaTimes()
+                    listarTimes()
+                elif opcao == 4:
+                    limpar_tela()
+                    
+                elif opcao == 5:
+                    limpar_tela()
+                elif opcao == 6:
+                    limpar_tela()
             elif opcao == 7:
                 programa_ativo = False
                 limpar_tela()
